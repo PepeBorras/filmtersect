@@ -81,9 +81,9 @@ export function PosterGrid({ centerContent }: PosterGridProps) {
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-white [--poster-gap:30px] [--poster-h:132px] [--poster-w:88px]">
+    <section className="relative min-h-screen overflow-hidden bg-white [--poster-gap:14px] [--poster-h:96px] [--poster-w:64px] sm:[--poster-gap:22px] sm:[--poster-h:114px] sm:[--poster-w:76px] md:[--poster-gap:30px] md:[--poster-h:132px] md:[--poster-w:88px]">
       <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div className="grid gap-[var(--poster-gap)]" style={gridStyle}>
+        <div className="grid gap-(--poster-gap)" style={gridStyle}>
           {cellIndexes.map((cellIndex) => {
             const row = Math.floor(cellIndex / GRID_COLS) + 1;
             const col = (cellIndex % GRID_COLS) + 1;
@@ -104,13 +104,13 @@ export function PosterGrid({ centerContent }: PosterGridProps) {
               return (
                 <div
                   key="center-interface"
-                  className="z-10 pointer-events-auto flex items-center justify-center overflow-hidden bg-white px-5 py-6"
+                  className="z-10 pointer-events-auto flex items-center justify-center overflow-hidden bg-white/98 px-3 py-4 sm:px-5 sm:py-6"
                   style={{
                     gridColumn: `${INTERFACE_COL_START} / span ${INTERFACE_COL_SPAN}`,
                     gridRow: `${INTERFACE_ROW_START} / span ${INTERFACE_ROW_SPAN}`,
                   }}
                 >
-                  <div className="integrated-scroll h-full w-full overflow-y-auto pr-1">{centerContent}</div>
+                  <div className="integrated-scroll h-full w-full overflow-y-auto pr-0 sm:pr-1">{centerContent}</div>
                 </div>
               );
             }
@@ -139,7 +139,7 @@ function PosterTile({ tileIndex, posterUrl, className }: PosterTileProps) {
   return (
     <div
       className={cn(
-        "pointer-events-none relative aspect-[2/3] w-[var(--poster-w)] overflow-hidden rounded-md border border-white/40 bg-linear-to-br",
+        "pointer-events-none relative aspect-2/3 w-(--poster-w) overflow-hidden rounded-md border border-white/40 bg-linear-to-br",
         TILE_STYLES[tileIndex % TILE_STYLES.length],
         className,
       )}

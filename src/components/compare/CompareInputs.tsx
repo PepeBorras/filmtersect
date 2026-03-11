@@ -294,13 +294,13 @@ export function CompareInputs() {
   }, [leftSelectedPerson, pathname, rightSelectedPerson, router, searchParams]);
 
   return (
-    <section className="mx-auto flex h-full w-full max-w-[360px] flex-col justify-start gap-4 py-2 text-center">
+    <section className="mx-auto flex h-full w-full max-w-90 flex-col justify-start gap-3 px-1.5 py-1 text-center sm:gap-4 sm:px-0 sm:py-2">
       <div className="space-y-2">
-        <h1 className="font-serif text-3xl tracking-tight text-stone-900">Filmtersect</h1>
-        <p className="text-sm text-stone-600">Find where two film careers overlap.</p>
+        <h1 className="font-serif text-[1.7rem] tracking-tight text-stone-900 sm:text-3xl">Filmtersect</h1>
+        <p className="text-[13px] text-stone-600 sm:text-sm">Find where two film careers overlap.</p>
       </div>
 
-      <div className="mx-auto flex w-full max-w-[320px] flex-col gap-3">
+      <div className="mx-auto flex w-full flex-col gap-2.5 sm:max-w-[320px] sm:gap-3">
         <div className="w-full">
           <SearchAutocomplete
             label="Person one"
@@ -334,10 +334,10 @@ export function CompareInputs() {
         </div>
       </div>
 
-      <p className="text-xs text-stone-500">Search any two cast or crew members.</p>
+      <p className="text-[11px] text-stone-500 sm:text-xs">Search any two cast or crew members.</p>
 
       {shouldShow ? (
-        <section className="mx-auto w-full max-w-[340px] space-y-3 rounded-sm border-t border-stone-300/60 pt-3 text-left">
+        <section className="mx-auto w-full space-y-3 rounded-sm border-t border-stone-300/60 pt-3 text-left sm:max-w-85">
           {isLoading ? <p className="text-sm text-stone-600 animate-pulse">Finding shared titles...</p> : null}
           {!isLoading && errorMessage ? (
             <p className="rounded-sm border border-stone-300/55 bg-stone-100/70 px-2.5 py-2 text-sm text-stone-700">
