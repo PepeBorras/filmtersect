@@ -27,15 +27,34 @@ function isSharedTitleItem(value: unknown): value is SharedTitle {
   );
 }
 
+function isTopCollaboratorItem(value: unknown): value is NonNullable<FilmtersectsApiSuccess["topCollaborators"]>["personA"]["cast"] {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.personId === "number" &&
+    typeof candidate.name === "string" &&
+    (typeof candidate.profilePath === "string" || candidate.profilePath === null) &&
+    typeof candidate.sharedCount === "number"
+  );
+}
+
 function normalizeTopCollaborators(value: FilmtersectsApiSuccess["topCollaborators"] | undefined): TopCollaboratorsBySide {
+  const personACast = isTopCollaboratorItem(value?.personA?.cast) ? value.personA.cast : null;
+  const personACrew = isTopCollaboratorItem(value?.personA?.crew) ? value.personA.crew : null;
+  const personBCast = isTopCollaboratorItem(value?.personB?.cast) ? value.personB.cast : null;
+  const personBCrew = isTopCollaboratorItem(value?.personB?.crew) ? value.personB.crew : null;
+
   return {
     personA: {
-      cast: value?.personA?.cast ?? null,
-      crew: value?.personA?.crew ?? null,
+      cast: personACast,
+      crew: personACrew,
     },
     personB: {
-      cast: value?.personB?.cast ?? null,
-      crew: value?.personB?.crew ?? null,
+      cast: personBCast,
+      crew: personBCrew,
     },
   };
 }

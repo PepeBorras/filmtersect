@@ -126,7 +126,7 @@ function CollaboratorRow({ label, collaborator, href }: CollaboratorRowProps) {
             href={href}
             className="shrink-0 border-b border-stone-400 pb-0.5 text-[11px] tracking-tight text-stone-600 transition-colors hover:border-stone-700 hover:text-stone-900"
           >
-            Compare
+            View
           </a>
         ) : null}
       </div>
