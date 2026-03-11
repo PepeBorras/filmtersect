@@ -1,0 +1,23 @@
+import { SharedTitleItem } from "@/components/results/SharedTitleItem";
+import type { SharedTitle } from "@/lib/types/filmtersect";
+
+type ResultsListProps = {
+  items: SharedTitle[];
+  personAName: string;
+  personBName: string;
+};
+
+export function ResultsList({ items, personAName, personBName }: ResultsListProps) {
+  return (
+    <div className="space-y-4">
+      {items.map((item) => (
+        <SharedTitleItem
+          key={`${item.mediaType}:${item.id}`}
+          item={item}
+          personAName={personAName}
+          personBName={personBName}
+        />
+      ))}
+    </div>
+  );
+}

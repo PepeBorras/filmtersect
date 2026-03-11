@@ -1,0 +1,131 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import type { FilmtersectsApiError, FilmtersectsApiSuccess, SharedTitle, TopCollaboratorsBySide } from "@/lib/types/filmtersect";
+import type { PersonSearchResult } from "@/lib/types/search-person";
+
+const EMPTY_TOP_COLLABORATORS: TopCollaboratorsBySide = {
+  personA: { cast: null, crew: null },
+  personB: { cast: null, crew: null },
+};
+
+function isSharedTitleItem(value: unknown): value is SharedTitle {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.id === "number" &&
+    (candidate.mediaType === "movie" || candidate.mediaType === "tv") &&
+    typeof candidate.title === "string" &&
+    (typeof candidate.year === "string" || candidate.year === null) &&
+    (typeof candidate.posterPath === "string" || candidate.posterPath === null) &&
+    typeof candidate.personARole === "string" &&
+    typeof candidate.personBRole === "string"
+  );
+}
+
+function normalizeTopCollaborators(value: FilmtersectsApiSuccess["topCollaborators"] | undefined): TopCollaboratorsBySide {
+  return {
+    personA: {
+      cast: value?.personA?.cast ?? null,
+      crew: value?.personA?.crew ?? null,
+    },
+    personB: {
+      cast: value?.personB?.cast ?? null,
+      crew: value?.personB?.crew ?? null,
+    },
+  };
+}
+
+type UseFilmtersectsArgs = {
+  personA: PersonSearchResult | null;
+  personB: PersonSearchResult | null;
+};
+
+export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
+  const [results, setResults] = useState<SharedTitle[]>([]);
+  const [topCollaborators, setTopCollaborators] = useState<TopCollaboratorsBySide>(EMPTY_TOP_COLLABORATORS);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!personA || !personB) {
+      setResults([]);
+      setTopCollaborators(EMPTY_TOP_COLLABORATORS);
+      setErrorMessage(null);
+      setIsLoading(false);
+      return;
+    }
+
+    if (personA.id === personB.id) {
+      setResults([]);
+      setTopCollaborators(EMPTY_TOP_COLLABORATORS);
+      setErrorMessage("Please choose two different people.");
+      setIsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    void (async () => {
+      setIsLoading(true);
+
+      try {
+        const response = await fetch("/api/filmtersects", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            personAId: personA.id,
+            personBId: personB.id,
+          }),
+          signal: controller.signal,
+        });
+
+        const payload = (await response.json()) as FilmtersectsApiSuccess | FilmtersectsApiError;
+
+        if (!response.ok) {
+          throw new Error(("error" in payload && payload.error) || "Compare failed.");
+        }
+
+        if (!("results" in payload)) {
+          throw new Error("Invalid compare response.");
+        }
+
+        if (!Array.isArray(payload.results) || !payload.results.every((item) => isSharedTitleItem(item))) {
+          throw new Error("Compare returned invalid data.");
+        }
+
+        setResults(payload.results);
+        setTopCollaborators(normalizeTopCollaborators(payload.topCollaborators));
+        setErrorMessage(null);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        setResults([]);
+        setTopCollaborators(EMPTY_TOP_COLLABORATORS);
+        setErrorMessage(error instanceof Error ? error.message : "Compare failed.");
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, [personA, personB]);
+
+  return {
+    shouldShow: Boolean(personA && personB),
+    results,
+    topCollaborators,
+    isLoading,
+    errorMessage,
+  };
+}
