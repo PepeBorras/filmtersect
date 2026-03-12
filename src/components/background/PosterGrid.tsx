@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils/cn";
 
@@ -44,7 +44,29 @@ function shuffle<T>(items: T[]) {
 
 export function PosterGrid({ centerContent }: PosterGridProps) {
   const [posterUrls, setPosterUrls] = useState<string[]>([]);
+  const [showBottomFade, setShowBottomFade] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const cellIndexes = Array.from({ length: TOTAL_CELLS }, (_, index) => index);
+
+  const updateBottomFadeVisibility = useCallback(() => {
+    const element = scrollContainerRef.current;
+
+    if (!element) {
+      setShowBottomFade(false);
+      return;
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const hasOverflow = scrollHeight - clientHeight > 1;
+
+    if (!hasOverflow) {
+      setShowBottomFade(false);
+      return;
+    }
+
+    const scrollProgress = (scrollTop + clientHeight) / scrollHeight;
+    setShowBottomFade(scrollProgress < 0.95);
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -74,6 +96,21 @@ export function PosterGrid({ centerContent }: PosterGridProps) {
       controller.abort();
     };
   }, []);
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(updateBottomFadeVisibility);
+
+    const onResize = () => {
+      updateBottomFadeVisibility();
+    };
+
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [centerContent, posterUrls.length, updateBottomFadeVisibility]);
 
   const gridStyle: CSSProperties = {
     gridTemplateColumns: `repeat(${GRID_COLS}, var(--poster-w))`,
@@ -110,7 +147,22 @@ export function PosterGrid({ centerContent }: PosterGridProps) {
                     gridRow: `${INTERFACE_ROW_START} / span ${INTERFACE_ROW_SPAN}`,
                   }}
                 >
-                  <div className="integrated-scroll h-full w-full overflow-y-auto pr-0 sm:pr-1">{centerContent}</div>
+                  <div className="relative h-full w-full">
+                    <div
+                      ref={scrollContainerRef}
+                      onScroll={updateBottomFadeVisibility}
+                      className="integrated-scroll h-full w-full overflow-y-auto pr-0 sm:pr-1"
+                    >
+                      {centerContent}
+                    </div>
+                    <div
+                      aria-hidden="true"
+                      className={cn(
+                        "pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-white/95 via-white/65 to-white/0 transition-opacity duration-200",
+                        showBottomFade ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                  </div>
                 </div>
               );
             }
