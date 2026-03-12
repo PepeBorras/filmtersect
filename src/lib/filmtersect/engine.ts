@@ -1,4 +1,5 @@
 import { findDirectOverlaps } from "@/lib/filmtersect/direct-overlaps";
+import { findClosestConnection } from "@/lib/filmtersect/find-closest-connection";
 import { findTopCollaboratorForPerson } from "@/lib/filmtersect/find-top-collaborator";
 import { normalizeCombinedCredits } from "@/lib/filmtersect/normalize";
 import { getTmdbPersonCombinedCredits } from "@/lib/tmdb/service";
@@ -20,6 +21,8 @@ export async function findFilmtersects(personAId: number, personBId: number): Pr
     findTopCollaboratorForPerson(personBId, normalizedB, personAId, "crew").catch(() => null),
   ]);
 
+  const closestConnection = await findClosestConnection(personAId, normalizedA, personBId, normalizedB).catch(() => null);
+
   return {
     results: findDirectOverlaps(normalizedA, normalizedB),
     topCollaborators: {
@@ -32,5 +35,6 @@ export async function findFilmtersects(personAId: number, personBId: number): Pr
         crew: topCollaboratorBCrew,
       },
     },
+    closestConnection,
   };
 }

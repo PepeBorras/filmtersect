@@ -9,7 +9,7 @@ import { useFilmtersects } from "@/components/results/useFilmtersects";
 import { ResultsList } from "@/components/results/ResultsList";
 import { ResultsSummary } from "@/components/results/ResultsSummary";
 import { buildComparisonPath } from "@/lib/routing/comparison-url";
-import type { TopCollaborator, TopCollaboratorsByCategory } from "@/lib/types/filmtersect";
+import type { ClosestConnection, TopCollaborator, TopCollaboratorsByCategory } from "@/lib/types/filmtersect";
 import type { PersonSearchResult, SearchPersonApiResponse } from "@/lib/types/search-person";
 
 function isSearchPersonResult(value: unknown): value is PersonSearchResult {
@@ -70,6 +70,12 @@ type CompareInputsProps = {
 type TopCollaboratorBlockProps = {
   subject: PersonSearchResult;
   collaborators: TopCollaboratorsByCategory | null | undefined;
+};
+
+type ClosestConnectionBlockProps = {
+  personA: PersonSearchResult;
+  personB: PersonSearchResult;
+  closestConnection: ClosestConnection | null;
 };
 
 type CollaboratorRowProps = {
@@ -149,6 +155,51 @@ function TopCollaboratorBlock({ subject, collaborators }: TopCollaboratorBlockPr
   );
 }
 
+function ClosestConnectionBlock({ personA, personB, closestConnection }: ClosestConnectionBlockProps) {
+  if (!closestConnection) {
+    return null;
+  }
+
+  const compareFromA = buildComparisonHref(
+    { id: personA.id, name: personA.name },
+    { id: closestConnection.personId, name: closestConnection.name },
+  );
+
+  const compareFromB = buildComparisonHref(
+    { id: personB.id, name: personB.name },
+    { id: closestConnection.personId, name: closestConnection.name },
+  );
+
+  return (
+    <section className="space-y-2.5 border-t border-stone-300/45 pt-3">
+      <p className="text-[11px] tracking-[0.08em] text-stone-500">CLOSEST THEY GOT</p>
+      <p className="text-sm text-stone-700">Both worked frequently with {closestConnection.name}.</p>
+      <div className="space-y-1 text-xs text-stone-600">
+        <p>
+          {personA.name} - {closestConnection.personASharedCount} {closestConnection.personASharedCount === 1 ? "title" : "titles"}
+        </p>
+        <p>
+          {personB.name} - {closestConnection.personBSharedCount} {closestConnection.personBSharedCount === 1 ? "title" : "titles"}
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] tracking-tight text-stone-600">
+        <a
+          href={compareFromA}
+          className="border-b border-stone-400 pb-0.5 transition-colors hover:border-stone-700 hover:text-stone-900"
+        >
+          Compare {personA.name} x {closestConnection.name}
+        </a>
+        <a
+          href={compareFromB}
+          className="border-b border-stone-400 pb-0.5 transition-colors hover:border-stone-700 hover:text-stone-900"
+        >
+          Compare {personB.name} x {closestConnection.name}
+        </a>
+      </div>
+    </section>
+  );
+}
+
 export function CompareInputs({ initialPersonA = null, initialPersonB = null }: CompareInputsProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -157,7 +208,7 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
   const [rightQuery, setRightQuery] = useState("");
   const [leftSelectedPerson, setLeftSelectedPerson] = useState<PersonSearchResult | null>(initialPersonA);
   const [rightSelectedPerson, setRightSelectedPerson] = useState<PersonSearchResult | null>(initialPersonB);
-  const { shouldShow, results, topCollaborators, isLoading, errorMessage } = useFilmtersects({
+  const { shouldShow, results, topCollaborators, closestConnection, isLoading, errorMessage } = useFilmtersects({
     personA: leftSelectedPerson,
     personB: rightSelectedPerson,
   });
@@ -312,6 +363,11 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
               <TopCollaboratorBlock
                 subject={rightSelectedPerson}
                 collaborators={topCollaborators.personB}
+              />
+              <ClosestConnectionBlock
+                personA={leftSelectedPerson}
+                personB={rightSelectedPerson}
+                closestConnection={closestConnection}
               />
             </section>
           ) : null}

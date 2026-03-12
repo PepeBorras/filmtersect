@@ -39,15 +39,24 @@ export type TopCollaboratorsBySide = {
   personB: TopCollaboratorsByCategory;
 };
 
+export type ClosestConnection = {
+  personId: number;
+  name: string;
+  personASharedCount: number;
+  personBSharedCount: number;
+};
+
 export type FilmtersectComparison = {
   results: SharedTitle[];
   topCollaborators: TopCollaboratorsBySide;
+  closestConnection: ClosestConnection | null;
 };
 
 export type FilmtersectsApiSuccess = {
   count: number;
   results: SharedTitle[];
   topCollaborators: TopCollaboratorsBySide;
+  closestConnection: ClosestConnection | null;
 };
 
 export type FilmtersectsApiError = {

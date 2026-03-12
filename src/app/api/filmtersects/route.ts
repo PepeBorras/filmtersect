@@ -20,6 +20,7 @@ export async function POST(request: Request) {
       count: comparison.results.length,
       results: comparison.results,
       topCollaborators: comparison.topCollaborators,
+      closestConnection: comparison.closestConnection,
     };
     return NextResponse.json(response);
   } catch (error) {
