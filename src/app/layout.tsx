@@ -13,8 +13,30 @@ const literata = Literata({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://filmtersect.vercel.app"),
   title: "Filmtersect",
   description: "Find where two film careers overlap.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
+  openGraph: {
+    title: "Filmtersect",
+    description: "Find where two film careers overlap.",
+    type: "website",
+    images: [
+      {
+        url: "/social-share.png",
+        alt: "Filmtersect social preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Filmtersect",
+    description: "Find where two film careers overlap.",
+    images: ["/social-share.png"],
+  },
 };
 
 export default function RootLayout({
