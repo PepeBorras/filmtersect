@@ -118,15 +118,26 @@ function PopcornPlaceholderIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 text-stone-500/75">
       <path
-        d="M8.1 10h7.8l-1.2 9H9.3L8.1 10z"
+        d="M8 10.5h8l-1.1 8.5H9.1L8 10.5z"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.4"
         strokeLinejoin="round"
       />
-      <path d="M9.5 10V7.2M12 10V7.2M14.5 10V7.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       <path
-        d="M8 7.4c0-1 .8-1.8 1.8-1.8.7 0 1.3.4 1.6 1 .3-.4.8-.7 1.4-.7.8 0 1.6.5 1.8 1.3.3-.2.6-.3 1-.3 1 0 1.8.8 1.8 1.8 0 .6-.2 1.1-.6 1.5H8.6c-.4-.4-.6-.9-.6-1.5z"
+        d="M8.1 9.8h7.8"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M9.7 10.5v8.1M12 10.5v8.1M14.3 10.5v8.1"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8.1 8.7c0-.9.7-1.6 1.6-1.6.3 0 .6.1.9.3.2-.8 1-1.4 1.9-1.4.9 0 1.6.5 1.9 1.3.2-.1.5-.2.8-.2.9 0 1.6.7 1.6 1.6 0 .4-.2.8-.5 1.1H8.6c-.3-.3-.5-.7-.5-1.1z"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.4"
@@ -461,7 +472,7 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
         <div className="w-full">
           <SearchAutocomplete
             label="Person one"
-            placeholder="Search person one"
+            placeholder="e.g. Margot Robbie"
             query={leftQuery}
             selectedPerson={leftSelectedPerson}
             onQueryChange={setLeftQuery}
@@ -475,7 +486,7 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
         <div className="w-full">
           <SearchAutocomplete
             label="Person two"
-            placeholder="Search person two"
+            placeholder="e.g. Chiquito de la Calzada"
             query={rightQuery}
             selectedPerson={rightSelectedPerson}
             onQueryChange={setRightQuery}
@@ -536,7 +547,7 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
         </section>
       ) : null}
 
-      <p className="pt-1 text-[10px] leading-relaxed text-stone-500">
+      <p className="mt-auto pt-1 text-[10px] leading-relaxed text-stone-500">
         This product uses the TMDb API but is not endorsed or certified by TMDb.
       </p>
     </section>

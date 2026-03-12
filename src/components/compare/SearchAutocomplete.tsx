@@ -109,6 +109,7 @@ export function SearchAutocomplete({
       </label>
       <Input
         id={inputId}
+        className="placeholder:text-stone-400/55"
         value={query}
         placeholder={placeholder}
         autoComplete="off"
