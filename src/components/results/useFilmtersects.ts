@@ -106,10 +106,12 @@ export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
     }
 
     const controller = new AbortController();
+    let isCurrentRequest = true;
+
+    setIsLoading(true);
+    setErrorMessage(null);
 
     void (async () => {
-      setIsLoading(true);
-
       try {
         const response = await fetch("/api/filmtersects", {
           method: "POST",
@@ -137,6 +139,10 @@ export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
           throw new Error("Compare returned invalid data.");
         }
 
+        if (!isCurrentRequest) {
+          return;
+        }
+
         setResults(payload.results);
         setTopCollaborators(normalizeTopCollaborators(payload.topCollaborators));
         setClosestConnection(isClosestConnectionItem(payload.closestConnection) ? payload.closestConnection : null);
@@ -146,16 +152,23 @@ export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
           return;
         }
 
+        if (!isCurrentRequest) {
+          return;
+        }
+
         setResults([]);
         setTopCollaborators(EMPTY_TOP_COLLABORATORS);
         setClosestConnection(null);
         setErrorMessage(error instanceof Error ? error.message : "Compare failed.");
       } finally {
-        setIsLoading(false);
+        if (isCurrentRequest) {
+          setIsLoading(false);
+        }
       }
     })();
 
     return () => {
+      isCurrentRequest = false;
       controller.abort();
     };
   }, [personA, personB]);
