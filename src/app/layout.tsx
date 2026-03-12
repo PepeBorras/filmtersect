@@ -12,8 +12,11 @@ const literata = Literata({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://filmtersect.vercel.app";
+const OPEN_GRAPH_IMAGE_URL = `${SITE_URL}/social-share.png`;
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://filmtersect.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: "Filmtersect",
   description: "Find where two film careers overlap.",
   icons: {
@@ -26,7 +29,10 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/social-share.png",
+        url: OPEN_GRAPH_IMAGE_URL,
+        width: 718,
+        height: 426,
+        type: "image/png",
         alt: "Filmtersect social preview",
       },
     ],
@@ -35,7 +41,14 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Filmtersect",
     description: "Find where two film careers overlap.",
-    images: ["/social-share.png"],
+    images: [OPEN_GRAPH_IMAGE_URL],
+  },
+  other: {
+    "og:image": OPEN_GRAPH_IMAGE_URL,
+    "og:image:secure_url": OPEN_GRAPH_IMAGE_URL,
+    "og:image:type": "image/png",
+    "og:image:width": "718",
+    "og:image:height": "426",
   },
 };
 
