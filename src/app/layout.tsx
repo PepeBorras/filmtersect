@@ -68,15 +68,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning className={`${sora.variable} ${literata.variable} antialiased`}>
-        <main className="relative min-h-screen bg-white text-stone-900">
-          <PosterGrid
-            centerContent={
+        <div className="relative min-h-screen overflow-x-hidden">
+          {/* Decorative poster grid background */}
+          <div className="pointer-events-none absolute inset-0 z-0">
+            <PosterGrid />
+          </div>
+          {/* Foreground interface layer */}
+          <main className="relative z-10 flex flex-col items-center w-full min-h-screen">
+            <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16 rounded-3xl bg-white/80 backdrop-blur-xl shadow-xl border border-white/60 h-[70vh] overflow-y-auto mt-[15%]">
               <Suspense fallback={<div className="text-sm text-stone-600">Loading comparison tools...</div>}>
                 {children}
               </Suspense>
-            }
-          />
-        </main>
+            </div>
+          </main>
+        </div>
       </body>
     </html>
   );

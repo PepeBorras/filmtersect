@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils/cn";
 
@@ -22,9 +22,13 @@ const GRID_COLS = 18;
 const GRID_ROWS = 16;
 const INTERFACE_COL_SPAN = 4;
 const INTERFACE_ROW_SPAN = 4;
+const MOBILE_INTERFACE_COL_SPAN = GRID_COLS;
+const MOBILE_INTERFACE_ROW_SPAN = INTERFACE_ROW_SPAN + 1;
 
 const INTERFACE_COL_START = Math.floor((GRID_COLS - INTERFACE_COL_SPAN) / 2) + 1;
 const INTERFACE_ROW_START = Math.floor((GRID_ROWS - INTERFACE_ROW_SPAN) / 2) + 1;
+const MOBILE_INTERFACE_COL_START = 1;
+const MOBILE_INTERFACE_ROW_START = Math.max(1, INTERFACE_ROW_START - 1);
 const TOTAL_CELLS = GRID_COLS * GRID_ROWS;
 
 type BackgroundPostersResponse = {
@@ -91,31 +95,9 @@ function shuffle<T>(items: T[]) {
   return next;
 }
 
-export function PosterGrid({ centerContent }: PosterGridProps) {
+export function PosterGrid() {
   const [posterUrls, setPosterUrls] = useState<string[]>([]);
-  const [showBottomFade, setShowBottomFade] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const cellIndexes = Array.from({ length: TOTAL_CELLS }, (_, index) => index);
-
-  const updateBottomFadeVisibility = useCallback(() => {
-    const element = scrollContainerRef.current;
-
-    if (!element) {
-      setShowBottomFade(false);
-      return;
-    }
-
-    const { scrollTop, scrollHeight, clientHeight } = element;
-    const hasOverflow = scrollHeight - clientHeight > 1;
-
-    if (!hasOverflow) {
-      setShowBottomFade(false);
-      return;
-    }
-
-    const scrollProgress = (scrollTop + clientHeight) / scrollHeight;
-    setShowBottomFade(scrollProgress < 0.95);
-  }, []);
 
   useEffect(() => {
     const existingPosters = readSessionPosters();
@@ -160,85 +142,26 @@ export function PosterGrid({ centerContent }: PosterGridProps) {
     };
   }, []);
 
-  useEffect(() => {
-    const frameId = window.requestAnimationFrame(updateBottomFadeVisibility);
-
-    const onResize = () => {
-      updateBottomFadeVisibility();
-    };
-
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", onResize);
-    };
-  }, [centerContent, posterUrls.length, updateBottomFadeVisibility]);
-
   const gridStyle: CSSProperties = {
     gridTemplateColumns: `repeat(${GRID_COLS}, var(--poster-w))`,
     gridTemplateRows: `repeat(${GRID_ROWS}, var(--poster-h))`,
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden [--poster-gap:14px] [--poster-h:96px] [--poster-w:64px] sm:[--poster-gap:22px] sm:[--poster-h:114px] sm:[--poster-w:76px] md:[--poster-gap:30px] md:[--poster-h:132px] md:[--poster-w:88px]">
-      <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/24 via-transparent to-white/30" aria-hidden="true" />
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:scale-[1.02]">
+    <section
+      className="pointer-events-none absolute inset-0 overflow-hidden [--poster-gap:14px] [--poster-h:101px] [--poster-w:66px] sm:[--poster-gap:22px] sm:[--poster-h:120px] sm:[--poster-w:80px] md:[--poster-gap:30px] md:[--poster-h:138px] md:[--poster-w:92px]"
+      aria-hidden="true"
+    >
+      <div className="absolute inset-0 bg-linear-to-b from-white/24 via-transparent to-white/30" />
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:scale-[1.02]">
         <div className="grid gap-(--poster-gap)" style={gridStyle}>
-          {cellIndexes.map((cellIndex) => {
-            const row = Math.floor(cellIndex / GRID_COLS) + 1;
-            const col = (cellIndex % GRID_COLS) + 1;
-
-            const insideInterfaceSlot =
-              row >= INTERFACE_ROW_START &&
-              row < INTERFACE_ROW_START + INTERFACE_ROW_SPAN &&
-              col >= INTERFACE_COL_START &&
-              col < INTERFACE_COL_START + INTERFACE_COL_SPAN;
-
-            if (insideInterfaceSlot) {
-              const isTopLeftInterfaceCell = row === INTERFACE_ROW_START && col === INTERFACE_COL_START;
-
-              if (!isTopLeftInterfaceCell) {
-                return null;
-              }
-
-              return (
-                <div
-                  key="center-interface"
-                  className="z-10 pointer-events-auto flex items-center justify-center overflow-hidden rounded-4xl border border-white/55 bg-[rgba(252,248,243,0.62)] px-2.5 py-3 shadow-[0_24px_64px_-28px_rgba(30,24,18,0.45)] backdrop-blur-xl sm:rounded-[2.35rem] sm:px-4 sm:py-5"
-                  style={{
-                    gridColumn: `${INTERFACE_COL_START} / span ${INTERFACE_COL_SPAN}`,
-                    gridRow: `${INTERFACE_ROW_START} / span ${INTERFACE_ROW_SPAN}`,
-                  }}
-                >
-                  <div className="relative h-full w-full rounded-[1.6rem] border border-white/40 bg-white/34 p-2 sm:rounded-[1.9rem] sm:p-3">
-                    <div
-                      ref={scrollContainerRef}
-                      onScroll={updateBottomFadeVisibility}
-                      className="integrated-scroll h-full w-full overflow-y-auto px-1 pb-2 pt-1 sm:px-1.5"
-                    >
-                      {centerContent}
-                    </div>
-                    <div
-                      aria-hidden="true"
-                      className={cn(
-                        "pointer-events-none absolute inset-x-2 bottom-2 h-11 rounded-b-[1.2rem] bg-linear-to-t from-[#f8f3ec] via-[#f8f3ec]/62 to-[#f8f3ec]/0 transition-opacity duration-200",
-                        showBottomFade ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <PosterTile
-                key={`tile-${cellIndex}`}
-                tileIndex={cellIndex}
-                posterUrl={posterUrls.length ? posterUrls[cellIndex % posterUrls.length] : null}
-              />
-            );
-          })}
+          {cellIndexes.map((cellIndex) => (
+            <PosterTile
+              key={`tile-${cellIndex}`}
+              tileIndex={cellIndex}
+              posterUrl={posterUrls.length ? posterUrls[cellIndex % posterUrls.length] : null}
+            />
+          ))}
         </div>
       </div>
     </section>

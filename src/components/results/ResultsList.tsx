@@ -9,7 +9,7 @@ type ResultsListProps = {
 
 export function ResultsList({ items, personAName, personBName }: ResultsListProps) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 min-w-0">
       {items.map((item) => (
         <SharedTitleItem
           key={`${item.mediaType}:${item.id}`}

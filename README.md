@@ -46,10 +46,9 @@ You can copy `.env.example` to `.env.local` and fill the token.
 2. In Vercel, select **Add New... > Project** and import the repository.
 3. Keep default framework settings (Vercel will detect Next.js).
 4. In **Project Settings > Environment Variables**, add:
-
-	- Name: `TMDB_BEARER_TOKEN`
-	- Value: your TMDb **API Read Access Token (v4 auth)**
-	- Environments: Production (and Preview if desired)
+   - Name: `TMDB_BEARER_TOKEN`
+   - Value: your TMDb **API Read Access Token (v4 auth)**
+   - Environments: Production (and Preview if desired)
 
 5. Click **Deploy** for the first production build.
 6. After code changes, push to your connected branch to redeploy automatically.

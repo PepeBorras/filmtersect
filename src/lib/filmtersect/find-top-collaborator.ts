@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-import { findDirectOverlaps } from "@/lib/filmtersect/direct-overlaps";
-import { normalizeCombinedCredits } from "@/lib/filmtersect/normalize";
 import { tmdbFetch } from "@/lib/tmdb/fetch";
-import { getTmdbPersonCombinedCredits } from "@/lib/tmdb/service";
 import type { NormalizedCredit, TopCollaborator } from "@/lib/types/filmtersect";
 
 type CreditType = "cast" | "crew";
@@ -22,7 +19,6 @@ type ParsedCreditsByTitle = {
 
 const MAX_TITLES_TO_SCAN = 60;
 const TMDB_CREDITS_CONCURRENCY = 6;
-const MAX_CANDIDATES_TO_VALIDATE = 20;
 
 const creditsSchema = z.object({
   cast: z
@@ -166,40 +162,16 @@ export async function findTopCollaboratorForPerson(
     });
   });
 
-  const rankedCandidates = Array.from(collaboratorMap.values()).sort(compareCollaborators).slice(0, MAX_CANDIDATES_TO_VALIDATE);
+  const top = Array.from(collaboratorMap.values()).sort(compareCollaborators)[0];
 
-  for (const candidate of rankedCandidates) {
-    try {
-      const collaboratorCredits = await getTmdbPersonCombinedCredits(candidate.personId);
-      const normalizedCollaborator = normalizeCombinedCredits(candidate.personId, collaboratorCredits);
-      const overlaps = findDirectOverlaps(normalizedCredits, normalizedCollaborator);
-
-      if (!overlaps.length) {
-        continue;
-      }
-
-      const overlapKeys = new Set(overlaps.map((overlap) => overlap.mediaType + ":" + String(overlap.id)));
-      let validatedSharedCount = 0;
-      candidate.titleKeys.forEach((key) => {
-        if (overlapKeys.has(key)) {
-          validatedSharedCount += 1;
-        }
-      });
-
-      if (validatedSharedCount === 0) {
-        continue;
-      }
-
-      return {
-        personId: candidate.personId,
-        name: candidate.name,
-        profilePath: candidate.profilePath,
-        sharedCount: validatedSharedCount,
-      };
-    } catch {
-      continue;
-    }
+  if (!top) {
+    return null;
   }
 
-  return null;
+  return {
+    personId: top.personId,
+    name: top.name,
+    profilePath: top.profilePath,
+    sharedCount: top.titleKeys.size,
+  };
 }
