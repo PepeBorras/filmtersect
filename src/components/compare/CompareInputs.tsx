@@ -434,7 +434,7 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
       return;
     }
 
-    if (pathname !== "/") {
+    if (!leftSelectedPerson && !rightSelectedPerson && pathname !== "/") {
       router.replace("/", { scroll: false });
     }
   }, [leftSelectedPerson, pathname, rightSelectedPerson, router]);

@@ -31,6 +31,55 @@ type BackgroundPostersResponse = {
   posters?: string[];
 };
 
+const SESSION_POSTERS_KEY = "filmtersect.background-posters.v1";
+let cachedSessionPosters: string[] | null = null;
+
+function readSessionPosters(): string[] | null {
+  if (cachedSessionPosters && cachedSessionPosters.length > 0) {
+    return cachedSessionPosters;
+  }
+
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const stored = window.sessionStorage.getItem(SESSION_POSTERS_KEY);
+    if (!stored) {
+      return null;
+    }
+
+    const parsed = JSON.parse(stored) as unknown;
+    if (!Array.isArray(parsed)) {
+      return null;
+    }
+
+    const posters = parsed.filter((value): value is string => typeof value === "string" && value.length > 0);
+    if (!posters.length) {
+      return null;
+    }
+
+    cachedSessionPosters = posters;
+    return posters;
+  } catch {
+    return null;
+  }
+}
+
+function writeSessionPosters(posters: string[]) {
+  cachedSessionPosters = posters;
+
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(SESSION_POSTERS_KEY, JSON.stringify(posters));
+  } catch {
+    // Ignore storage quota/privacy failures and continue with in-memory cache only.
+  }
+}
+
 function shuffle<T>(items: T[]) {
   const next = [...items];
 
@@ -69,6 +118,18 @@ export function PosterGrid({ centerContent }: PosterGridProps) {
   }, []);
 
   useEffect(() => {
+    const existingPosters = readSessionPosters();
+
+    if (existingPosters) {
+      const frameId = window.requestAnimationFrame(() => {
+        setPosterUrls(existingPosters);
+      });
+
+      return () => {
+        window.cancelAnimationFrame(frameId);
+      };
+    }
+
     const controller = new AbortController();
 
     void (async () => {
@@ -84,7 +145,9 @@ export function PosterGrid({ centerContent }: PosterGridProps) {
 
         const payload = (await response.json()) as BackgroundPostersResponse;
         const posters = Array.isArray(payload.posters) ? payload.posters.filter(Boolean) : [];
-        setPosterUrls(shuffle(posters));
+        const shuffledPosters = shuffle(posters);
+        setPosterUrls(shuffledPosters);
+        writeSessionPosters(shuffledPosters);
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
           return;

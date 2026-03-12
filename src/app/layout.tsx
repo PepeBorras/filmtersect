@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Literata, Sora } from "next/font/google";
+import { Suspense } from "react";
+
+import { PosterGrid } from "@/components/background/PosterGrid";
+
 import "./globals.css";
 
 const sora = Sora({
@@ -64,7 +68,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning className={`${sora.variable} ${literata.variable} antialiased`}>
-        {children}
+        <main className="relative min-h-screen bg-white text-stone-900">
+          <PosterGrid
+            centerContent={
+              <Suspense fallback={<div className="text-sm text-stone-600">Loading comparison tools...</div>}>
+                {children}
+              </Suspense>
+            }
+          />
+        </main>
       </body>
     </html>
   );

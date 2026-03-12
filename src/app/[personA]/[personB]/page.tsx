@@ -1,7 +1,5 @@
-import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
-import { PosterGrid } from "@/components/background/PosterGrid";
 import { CompareInputs } from "@/components/compare/CompareInputs";
 import { createInitialPersonFromSegment } from "@/lib/routing/comparison-url";
 
@@ -22,15 +20,5 @@ export default async function ComparisonPage({ params }: ComparisonPageProps) {
     redirect("/");
   }
 
-  return (
-    <main className="relative min-h-screen bg-white text-stone-900">
-      <PosterGrid
-        centerContent={
-          <Suspense fallback={<div className="text-sm text-stone-600">Loading comparison tools...</div>}>
-            <CompareInputs initialPersonA={initialPersonA} initialPersonB={initialPersonB} />
-          </Suspense>
-        }
-      />
-    </main>
-  );
+  return <CompareInputs initialPersonA={initialPersonA} initialPersonB={initialPersonB} />;
 }
