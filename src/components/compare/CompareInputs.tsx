@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { Avatar } from "@/components/compare/SelectedPerson";
 import { SearchAutocomplete } from "@/components/compare/SearchAutocomplete";
 import { useFilmtersects } from "@/components/results/useFilmtersects";
 import { ResultsList } from "@/components/results/ResultsList";
 import { ResultsSummary } from "@/components/results/ResultsSummary";
+import { buildComparisonPath } from "@/lib/routing/comparison-url";
 import type { TopCollaborator, TopCollaboratorsByCategory } from "@/lib/types/filmtersect";
 import type { PersonSearchResult, SearchPersonApiResponse } from "@/lib/types/search-person";
 
@@ -57,40 +58,14 @@ async function hydratePersonProfile(
   };
 }
 
-function fromUrlParams(searchParams: URLSearchParams, prefix: "a" | "b"): PersonSearchResult | null {
-  const idRaw = searchParams.get(`${prefix}Id`);
-  const nameRaw = searchParams.get(`${prefix}Name`);
-  const profilePathRaw = searchParams.get(`${prefix}Profile`);
-  const departmentRaw = searchParams.get(`${prefix}Dept`);
-
-  if (!idRaw || !nameRaw) {
-    return null;
-  }
-
-  const id = Number(idRaw);
-  if (!Number.isInteger(id) || id <= 0) {
-    return null;
-  }
-
-  return {
-    id,
-    name: nameRaw,
-    knownForDepartment: departmentRaw || "Unknown",
-    profilePath: profilePathRaw || null,
-    popularity: 0,
-  };
-}
-
 function buildComparisonHref(personA: { id: number; name: string }, personB: { id: number; name: string }) {
-  const params = new URLSearchParams({
-    aId: String(personA.id),
-    aName: personA.name,
-    bId: String(personB.id),
-    bName: personB.name,
-  });
-
-  return `/?${params.toString()}`;
+  return buildComparisonPath(personA, personB);
 }
+
+type CompareInputsProps = {
+  initialPersonA?: PersonSearchResult | null;
+  initialPersonB?: PersonSearchResult | null;
+};
 
 type TopCollaboratorBlockProps = {
   subject: PersonSearchResult;
@@ -174,13 +149,9 @@ function TopCollaboratorBlock({ subject, collaborators }: TopCollaboratorBlockPr
   );
 }
 
-export function CompareInputs() {
+export function CompareInputs({ initialPersonA = null, initialPersonB = null }: CompareInputsProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const initialPersonA = fromUrlParams(new URLSearchParams(searchParams.toString()), "a");
-  const initialPersonB = fromUrlParams(new URLSearchParams(searchParams.toString()), "b");
 
   const [leftQuery, setLeftQuery] = useState("");
   const [rightQuery, setRightQuery] = useState("");
@@ -258,40 +229,23 @@ export function CompareInputs() {
   }, [rightSelectedPerson]);
 
   useEffect(() => {
-    const nextParams = new URLSearchParams();
+    if (leftSelectedPerson && rightSelectedPerson) {
+      const nextPath = buildComparisonPath(
+        { id: leftSelectedPerson.id, name: leftSelectedPerson.name },
+        { id: rightSelectedPerson.id, name: rightSelectedPerson.name },
+      );
 
-    if (leftSelectedPerson) {
-      nextParams.set("aId", String(leftSelectedPerson.id));
-      nextParams.set("aName", leftSelectedPerson.name);
-      if (leftSelectedPerson.profilePath) {
-        nextParams.set("aProfile", leftSelectedPerson.profilePath);
+      if (pathname !== nextPath) {
+        router.replace(nextPath, { scroll: false });
       }
-      if (leftSelectedPerson.knownForDepartment) {
-        nextParams.set("aDept", leftSelectedPerson.knownForDepartment);
-      }
-    }
 
-    if (rightSelectedPerson) {
-      nextParams.set("bId", String(rightSelectedPerson.id));
-      nextParams.set("bName", rightSelectedPerson.name);
-      if (rightSelectedPerson.profilePath) {
-        nextParams.set("bProfile", rightSelectedPerson.profilePath);
-      }
-      if (rightSelectedPerson.knownForDepartment) {
-        nextParams.set("bDept", rightSelectedPerson.knownForDepartment);
-      }
-    }
-
-    const nextQuery = nextParams.toString();
-    const currentQuery = searchParams.toString();
-
-    if (nextQuery === currentQuery) {
       return;
     }
 
-    const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
-    router.replace(nextUrl, { scroll: false });
-  }, [leftSelectedPerson, pathname, rightSelectedPerson, router, searchParams]);
+    if (pathname !== "/") {
+      router.replace("/", { scroll: false });
+    }
+  }, [leftSelectedPerson, pathname, rightSelectedPerson, router]);
 
   return (
     <section className="mx-auto flex h-full w-full max-w-90 flex-col justify-start gap-3 px-1.5 py-1 text-center sm:gap-4 sm:px-0 sm:py-2">
