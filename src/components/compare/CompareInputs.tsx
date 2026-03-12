@@ -153,14 +153,14 @@ function CollaboratorRow({ label, collaborator, href }: CollaboratorRowProps) {
   }
 
   return (
-    <div className="space-y-1">
-      <p className="text-[11px] text-stone-500">{label}</p>
+    <div className="space-y-1.5">
+      <p className="text-[10px] tracking-[0.08em] text-stone-500 uppercase">{label}</p>
       <div className="flex min-w-0 items-center justify-between gap-2.5">
         <div className="flex min-w-0 items-center gap-2.5">
           <Avatar name={collaborator.name} profilePath={collaborator.profilePath} />
           <div className="min-w-0">
-            <p className="truncate text-sm tracking-tight text-stone-900">{collaborator.name}</p>
-            <p className="text-xs text-stone-600">
+            <p className="truncate text-sm font-medium tracking-tight text-stone-900">{collaborator.name}</p>
+            <p className="text-[11px] text-stone-600">
               {collaborator.sharedCount} shared {collaborator.sharedCount === 1 ? "title" : "titles"}
             </p>
           </div>
@@ -168,7 +168,7 @@ function CollaboratorRow({ label, collaborator, href }: CollaboratorRowProps) {
         {href ? (
           <a
             href={href}
-            className="shrink-0 border-b border-stone-400 pb-0.5 text-[11px] tracking-tight text-stone-600 transition-colors hover:border-stone-700 hover:text-stone-900"
+            className="shrink-0 rounded-full border border-stone-300/80 px-2.5 py-1 text-[10px] tracking-[0.06em] text-stone-700 transition-colors hover:border-stone-500 hover:text-stone-900"
           >
             View
           </a>
@@ -182,8 +182,8 @@ function TopCollaboratorBlock({ subject, collaborators }: TopCollaboratorBlockPr
   const hasAny = Boolean(collaborators?.cast || collaborators?.crew);
 
   return (
-    <article className="space-y-1.5 border-b border-stone-300/45 pb-3 last:border-b-0 last:pb-0">
-      <p className="text-[11px] tracking-[0.03em] text-stone-500">Most frequent collaborator for {subject.name}</p>
+    <article className="space-y-2 rounded-2xl border border-white/60 bg-white/46 px-3 py-3 shadow-[0_12px_24px_-20px_rgba(33,26,18,0.55)]">
+      <p className="text-[11px] tracking-[0.04em] text-stone-500">Most frequent collaborator for {subject.name}</p>
       {hasAny ? (
         <div className="space-y-2">
           <CollaboratorRow
@@ -222,7 +222,7 @@ function ViewPairAction({ href, leftName, leftProfilePath, rightName, rightProfi
   return (
     <a
       href={href}
-      className="inline-flex items-center gap-2 border-b border-stone-400 pb-0.5 text-[11px] tracking-tight text-stone-600 transition-colors hover:border-stone-700 hover:text-stone-900"
+      className="inline-flex items-center gap-2 rounded-full border border-stone-300/80 px-2.5 py-1 text-[10px] tracking-[0.06em] text-stone-700 transition-colors hover:border-stone-500 hover:text-stone-900"
     >
       <span className="flex items-center">
         <Avatar name={leftName} profilePath={leftProfilePath} />
@@ -230,7 +230,7 @@ function ViewPairAction({ href, leftName, leftProfilePath, rightName, rightProfi
           <Avatar name={rightName} profilePath={rightProfilePath} />
         </span>
       </span>
-      <span>
+      <span className="truncate">
         View {leftName} × {rightName}
       </span>
     </a>
@@ -258,7 +258,7 @@ function SelectionAvatar({ person, side }: SelectionAvatarProps) {
       : "B";
 
   return (
-    <div className="relative size-16 overflow-hidden rounded-full border border-stone-300/80 bg-stone-100 sm:size-17">
+    <div className="relative size-17 overflow-hidden rounded-full border border-white/70 bg-stone-100/90 shadow-[0_10px_22px_-16px_rgba(30,24,18,0.6)] sm:size-18">
       {imageUrl ? (
         <Image
           src={imageUrl}
@@ -295,10 +295,10 @@ function ClosestConnectionBlock({ personA, personB, closestConnection, hasShared
   );
 
   return (
-    <section className="space-y-2.5 border-t border-stone-300/45 pt-3">
+    <section className="space-y-2.5 rounded-2xl border border-white/60 bg-white/46 px-3 py-3 shadow-[0_12px_24px_-20px_rgba(33,26,18,0.55)]">
       <p className="text-[11px] tracking-[0.08em] text-stone-500">{heading}</p>
       <p className="text-sm text-stone-700">Both worked frequently with {closestConnection.name}.</p>
-      <div className="space-y-1 text-xs text-stone-600">
+      <div className="space-y-1 text-[11px] text-stone-600">
         <p>
           {personA.name} - {closestConnection.personASharedCount} {closestConnection.personASharedCount === 1 ? "title" : "titles"}
         </p>
@@ -453,22 +453,22 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
   };
 
   return (
-    <section className="mx-auto flex h-full w-full max-w-90 flex-col justify-start gap-3 px-1.5 py-1 text-center sm:gap-4 sm:px-0 sm:py-2">
-      <div className="space-y-2">
-        <h1 className="font-serif text-[1.7rem] tracking-tight text-stone-900 sm:text-3xl">Filmtersect</h1>
-        <p className="text-[13px] text-stone-600 sm:text-sm">Find where two film careers overlap.</p>
+    <section className="mx-auto flex h-full w-full max-w-136 flex-col justify-start gap-4 px-1 py-0.5 text-center sm:gap-5 sm:px-0 sm:py-1">
+      <div className="space-y-1.5 pt-1">
+        <h1 className="font-serif text-[2rem] leading-none tracking-tight text-stone-900 sm:text-[2.35rem]">Filmtersect</h1>
+        <p className="text-[12px] text-stone-600 sm:text-[13px]">Find where two film careers overlap.</p>
       </div>
 
-      <div className="mx-auto flex items-center justify-center" aria-label="Selected people preview">
+      <div className="mx-auto flex items-center justify-center pt-1" aria-label="Selected people preview">
         <SelectionAvatar person={leftSelectedPerson} side="left" />
-        <div className="-ml-4">
+        <div className="-ml-5">
           <SelectionAvatar person={rightSelectedPerson} side="right" />
         </div>
       </div>
 
-      <p className="mt-2 text-[11px] text-stone-500 sm:mt-2.5 sm:text-xs">Search any two cast or crew members.</p>
+      <p className="text-[10px] tracking-[0.16em] text-stone-500 uppercase sm:text-[11px]">Search any two cast or crew members</p>
 
-      <div className="mx-auto mt-1 flex w-full flex-col gap-3 sm:max-w-[320px] sm:gap-3.5">
+      <div className="mx-auto mt-0.5 flex w-full flex-col gap-3 sm:max-w-90">
         <div className="w-full">
           <SearchAutocomplete
             label="Person one"
@@ -500,10 +500,10 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
       </div>
 
       {shouldShow ? (
-        <section className="mx-auto w-full space-y-3 rounded-sm border-t border-stone-300/60 pt-3 text-left sm:max-w-85">
+        <section className="mx-auto w-full space-y-3.5 border-t border-stone-300/45 pt-3 text-left sm:max-w-126">
           {isLoading ? <p className="text-sm text-stone-600 animate-pulse">Finding shared titles...</p> : null}
           {!isLoading && errorMessage ? (
-            <p className="rounded-sm border border-stone-300/55 bg-stone-100/70 px-2.5 py-2 text-sm text-stone-700">
+            <p className="rounded-xl border border-stone-300/45 bg-white/55 px-3 py-2 text-sm text-stone-700">
               {errorMessage}
             </p>
           ) : null}
@@ -535,16 +535,16 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
               <button
                 type="button"
                 onClick={handleShareResults}
-                className="cursor-pointer rounded-full border border-stone-300/80 px-3 py-1 text-[11px] tracking-tight text-stone-700 transition-colors hover:border-stone-500 hover:text-stone-900"
+                className="cursor-pointer rounded-full border border-stone-300/75 bg-white/55 px-3 py-1 text-[11px] tracking-[0.06em] text-stone-700 transition-colors hover:border-stone-500 hover:text-stone-900"
               >
-                {shareState === "copied" ? "Copied" : "Share this results"}
+                {shareState === "copied" ? "Copied" : "Share these results"}
               </button>
             </div>
           ) : null}
         </section>
       ) : null}
 
-      <p className="mt-auto pt-1 text-[10px] leading-relaxed text-stone-500">
+      <p className="mt-auto pt-1 text-[10px] leading-relaxed text-stone-500/95">
         This little app uses the TMDb API but is not endorsed or certified by TMDb.
       </p>
     </section>

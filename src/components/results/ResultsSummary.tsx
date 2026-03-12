@@ -5,5 +5,13 @@ type ResultsSummaryProps = {
 export function ResultsSummary({ count }: ResultsSummaryProps) {
   const label = count === 1 ? "shared title" : "shared titles";
 
-  return <p className="text-sm tracking-tight text-stone-700">{count} {label}</p>;
+  return (
+    <div className="flex items-center gap-3">
+      <span className="h-px flex-1 bg-stone-300/65" />
+      <p className="text-[11px] tracking-[0.2em] text-stone-600 uppercase">
+        {count} {label}
+      </p>
+      <span className="h-px flex-1 bg-stone-300/65" />
+    </div>
+  );
 }

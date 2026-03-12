@@ -181,8 +181,9 @@ export function PosterGrid({ centerContent }: PosterGridProps) {
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-white [--poster-gap:14px] [--poster-h:96px] [--poster-w:64px] sm:[--poster-gap:22px] sm:[--poster-h:114px] sm:[--poster-w:76px] md:[--poster-gap:30px] md:[--poster-h:132px] md:[--poster-w:88px]">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+    <section className="relative min-h-screen overflow-hidden [--poster-gap:14px] [--poster-h:96px] [--poster-w:64px] sm:[--poster-gap:22px] sm:[--poster-h:114px] sm:[--poster-w:76px] md:[--poster-gap:30px] md:[--poster-h:132px] md:[--poster-w:88px]">
+      <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/24 via-transparent to-white/30" aria-hidden="true" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:scale-[1.02]">
         <div className="grid gap-(--poster-gap)" style={gridStyle}>
           {cellIndexes.map((cellIndex) => {
             const row = Math.floor(cellIndex / GRID_COLS) + 1;
@@ -204,24 +205,24 @@ export function PosterGrid({ centerContent }: PosterGridProps) {
               return (
                 <div
                   key="center-interface"
-                  className="z-10 pointer-events-auto flex items-center justify-center overflow-hidden bg-white/98 px-3 py-4 sm:px-5 sm:py-6"
+                  className="z-10 pointer-events-auto flex items-center justify-center overflow-hidden rounded-4xl border border-white/55 bg-[rgba(252,248,243,0.62)] px-2.5 py-3 shadow-[0_24px_64px_-28px_rgba(30,24,18,0.45)] backdrop-blur-xl sm:rounded-[2.35rem] sm:px-4 sm:py-5"
                   style={{
                     gridColumn: `${INTERFACE_COL_START} / span ${INTERFACE_COL_SPAN}`,
                     gridRow: `${INTERFACE_ROW_START} / span ${INTERFACE_ROW_SPAN}`,
                   }}
                 >
-                  <div className="relative h-full w-full">
+                  <div className="relative h-full w-full rounded-[1.6rem] border border-white/40 bg-white/34 p-2 sm:rounded-[1.9rem] sm:p-3">
                     <div
                       ref={scrollContainerRef}
                       onScroll={updateBottomFadeVisibility}
-                      className="integrated-scroll h-full w-full overflow-y-auto pr-0 sm:pr-1"
+                      className="integrated-scroll h-full w-full overflow-y-auto px-1 pb-2 pt-1 sm:px-1.5"
                     >
                       {centerContent}
                     </div>
                     <div
                       aria-hidden="true"
                       className={cn(
-                        "pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-white/95 via-white/65 to-white/0 transition-opacity duration-200",
+                        "pointer-events-none absolute inset-x-2 bottom-2 h-11 rounded-b-[1.2rem] bg-linear-to-t from-[#f8f3ec] via-[#f8f3ec]/62 to-[#f8f3ec]/0 transition-opacity duration-200",
                         showBottomFade ? "opacity-100" : "opacity-0",
                       )}
                     />
@@ -254,7 +255,7 @@ function PosterTile({ tileIndex, posterUrl, className }: PosterTileProps) {
   return (
     <div
       className={cn(
-        "pointer-events-none relative aspect-2/3 w-(--poster-w) overflow-hidden rounded-md border border-white/40 bg-linear-to-br",
+        "pointer-events-none relative aspect-2/3 w-(--poster-w) overflow-hidden rounded-lg border border-white/45 bg-linear-to-br",
         TILE_STYLES[tileIndex % TILE_STYLES.length],
         className,
       )}
@@ -265,7 +266,7 @@ function PosterTile({ tileIndex, posterUrl, className }: PosterTileProps) {
           alt=""
           fill
           sizes="88px"
-          className="object-cover opacity-75 saturate-75 brightness-90 contrast-95"
+          className="object-cover opacity-68 saturate-70 brightness-95 contrast-90"
         />
       ) : (
         <div className="h-full w-full" aria-hidden="true" />

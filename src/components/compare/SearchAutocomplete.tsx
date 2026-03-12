@@ -96,7 +96,7 @@ export function SearchAutocomplete({
   if (selectedPerson) {
     return (
       <div className="w-full text-left" ref={rootRef}>
-        <p className="mb-1.5 text-[11px] tracking-[0.06em] text-stone-500">{label}</p>
+        <p className="mb-2 text-[10px] tracking-[0.14em] text-stone-500 uppercase">{label}</p>
         <SelectedPerson person={selectedPerson} onClear={onClear} />
       </div>
     );
@@ -104,12 +104,12 @@ export function SearchAutocomplete({
 
   return (
     <div className="relative w-full text-left" ref={rootRef}>
-      <label htmlFor={inputId} className="mb-1.5 block text-[11px] tracking-[0.06em] text-stone-500">
+      <label htmlFor={inputId} className="mb-2 block text-[10px] tracking-[0.14em] text-stone-500 uppercase">
         {label}
       </label>
       <Input
         id={inputId}
-        className="placeholder:text-stone-400/55"
+        className="placeholder:text-stone-400/65"
         value={query}
         placeholder={placeholder}
         autoComplete="off"
