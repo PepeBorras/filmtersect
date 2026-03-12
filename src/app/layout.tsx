@@ -14,6 +14,7 @@ const literata = Literata({
 
 const SITE_URL = "https://filmtersect.vercel.app";
 const OPEN_GRAPH_IMAGE_URL = `${SITE_URL}/social-share.png`;
+const FACEBOOK_APP_ID = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
     title: "Filmtersect",
     description: "Find where two film careers overlap.",
     type: "website",
+    url: SITE_URL,
     images: [
       {
         url: OPEN_GRAPH_IMAGE_URL,
@@ -44,11 +46,13 @@ export const metadata: Metadata = {
     images: [OPEN_GRAPH_IMAGE_URL],
   },
   other: {
+    "og:url": SITE_URL,
     "og:image": OPEN_GRAPH_IMAGE_URL,
     "og:image:secure_url": OPEN_GRAPH_IMAGE_URL,
     "og:image:type": "image/png",
     "og:image:width": "718",
     "og:image:height": "426",
+    ...(FACEBOOK_APP_ID ? { "fb:app_id": FACEBOOK_APP_ID } : {}),
   },
 };
 
