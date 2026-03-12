@@ -7,6 +7,7 @@ import type { ClosestConnection, NormalizedCredit } from "@/lib/types/filmtersec
 type CollaboratorCounter = {
   personId: number;
   name: string;
+  profilePath: string | null;
   titleKeys: Set<string>;
 };
 
@@ -25,6 +26,7 @@ const creditsSchema = z.object({
         id: z.number().nullable().optional(),
         name: z.string().nullable().optional(),
         character: z.string().nullable().optional(),
+        profile_path: z.string().nullable().optional(),
       }),
     )
     .optional(),
@@ -33,6 +35,7 @@ const creditsSchema = z.object({
       z.object({
         id: z.number().nullable().optional(),
         name: z.string().nullable().optional(),
+        profile_path: z.string().nullable().optional(),
       }),
     )
     .optional(),
@@ -137,6 +140,7 @@ async function buildCollaboratorMap(
         collaboratorMap.set(collaboratorId, {
           personId: collaboratorId,
           name: collaboratorName,
+          profilePath: entry.profile_path ?? null,
           titleKeys: new Set([key]),
         });
         return;
@@ -145,6 +149,9 @@ async function buildCollaboratorMap(
       existing.titleKeys.add(key);
       if (collaboratorName.localeCompare(existing.name, undefined, { sensitivity: "base" }) < 0) {
         existing.name = collaboratorName;
+      }
+      if (!existing.profilePath && entry.profile_path) {
+        existing.profilePath = entry.profile_path;
       }
     });
 
@@ -161,6 +168,7 @@ async function buildCollaboratorMap(
         collaboratorMap.set(collaboratorId, {
           personId: collaboratorId,
           name: collaboratorName,
+          profilePath: entry.profile_path ?? null,
           titleKeys: new Set([key]),
         });
         return;
@@ -169,6 +177,9 @@ async function buildCollaboratorMap(
       existing.titleKeys.add(key);
       if (collaboratorName.localeCompare(existing.name, undefined, { sensitivity: "base" }) < 0) {
         existing.name = collaboratorName;
+      }
+      if (!existing.profilePath && entry.profile_path) {
+        existing.profilePath = entry.profile_path;
       }
     });
   });
@@ -219,6 +230,7 @@ export async function findClosestConnection(
     sharedCandidates.push({
       personId: collaboratorId,
       name: collaboratorA.name,
+      profilePath: collaboratorA.profilePath ?? collaboratorB.profilePath,
       personASharedCount: collaboratorA.titleKeys.size,
       personBSharedCount: collaboratorB.titleKeys.size,
     });

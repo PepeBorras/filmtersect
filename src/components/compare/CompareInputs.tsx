@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -9,6 +10,7 @@ import { useFilmtersects } from "@/components/results/useFilmtersects";
 import { ResultsList } from "@/components/results/ResultsList";
 import { ResultsSummary } from "@/components/results/ResultsSummary";
 import { buildComparisonPath } from "@/lib/routing/comparison-url";
+import { getTmdbProfileImageUrl } from "@/lib/tmdb/image";
 import type { ClosestConnection, TopCollaborator, TopCollaboratorsByCategory } from "@/lib/types/filmtersect";
 import type { PersonSearchResult, SearchPersonApiResponse } from "@/lib/types/search-person";
 
@@ -76,6 +78,7 @@ type ClosestConnectionBlockProps = {
   personA: PersonSearchResult;
   personB: PersonSearchResult;
   closestConnection: ClosestConnection | null;
+  hasSharedTitles: boolean;
 };
 
 type CollaboratorRowProps = {
@@ -83,6 +86,55 @@ type CollaboratorRowProps = {
   collaborator: TopCollaborator | null;
   href: string | null;
 };
+
+type ViewPairActionProps = {
+  href: string;
+  leftName: string;
+  leftProfilePath: string | null;
+  rightName: string;
+  rightProfilePath: string | null;
+};
+
+type SelectionAvatarProps = {
+  person: PersonSearchResult | null;
+  side: "left" | "right";
+};
+
+function StarPlaceholderIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 text-stone-500/75">
+      <path
+        d="M12 3.5l2.6 5.28 5.83.85-4.22 4.1.99 5.79L12 16.9l-5.2 2.62.99-5.79-4.22-4.1 5.83-.85L12 3.5z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function PopcornPlaceholderIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 text-stone-500/75">
+      <path
+        d="M8.1 10h7.8l-1.2 9H9.3L8.1 10z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path d="M9.5 10V7.2M12 10V7.2M14.5 10V7.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path
+        d="M8 7.4c0-1 .8-1.8 1.8-1.8.7 0 1.3.4 1.6 1 .3-.4.8-.7 1.4-.7.8 0 1.6.5 1.8 1.3.3-.2.6-.3 1-.3 1 0 1.8.8 1.8 1.8 0 .6-.2 1.1-.6 1.5H8.6c-.4-.4-.6-.9-.6-1.5z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 function CollaboratorRow({ label, collaborator, href }: CollaboratorRowProps) {
   if (!collaborator) {
@@ -155,10 +207,71 @@ function TopCollaboratorBlock({ subject, collaborators }: TopCollaboratorBlockPr
   );
 }
 
-function ClosestConnectionBlock({ personA, personB, closestConnection }: ClosestConnectionBlockProps) {
+function ViewPairAction({ href, leftName, leftProfilePath, rightName, rightProfilePath }: ViewPairActionProps) {
+  return (
+    <a
+      href={href}
+      className="inline-flex items-center gap-2 border-b border-stone-400 pb-0.5 text-[11px] tracking-tight text-stone-600 transition-colors hover:border-stone-700 hover:text-stone-900"
+    >
+      <span className="flex items-center">
+        <Avatar name={leftName} profilePath={leftProfilePath} />
+        <span className="-ml-2">
+          <Avatar name={rightName} profilePath={rightProfilePath} />
+        </span>
+      </span>
+      <span>
+        View {leftName} × {rightName}
+      </span>
+    </a>
+  );
+}
+
+function SelectionAvatar({ person, side }: SelectionAvatarProps) {
+  const imageUrl = getTmdbProfileImageUrl(person?.profilePath ?? null, "w185");
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const isEmptySlot = !person;
+
+  useEffect(() => {
+    setIsImageLoaded(false);
+  }, [imageUrl]);
+
+  const initials = person?.name
+    ? person.name
+        .split(" ")
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase()
+    : side === "left"
+      ? "A"
+      : "B";
+
+  return (
+    <div className="relative size-16 overflow-hidden rounded-full border border-stone-300/80 bg-stone-100 sm:size-17">
+      {imageUrl ? (
+        <Image
+          src={imageUrl}
+          alt={person ? `${person.name} profile` : `${side} profile placeholder`}
+          fill
+          sizes="72px"
+          onLoadingComplete={() => setIsImageLoaded(true)}
+          className={`object-cover transition duration-150 ease-out ${isImageLoaded ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-xs tracking-[0.08em] text-stone-500">
+          {isEmptySlot ? (side === "left" ? <StarPlaceholderIcon /> : <PopcornPlaceholderIcon />) : initials}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ClosestConnectionBlock({ personA, personB, closestConnection, hasSharedTitles }: ClosestConnectionBlockProps) {
   if (!closestConnection) {
     return null;
   }
+
+  const heading = hasSharedTitles ? "SOMEONE ELSE IN COMMON" : "CLOSEST THEY GOT";
 
   const compareFromA = buildComparisonHref(
     { id: personA.id, name: personA.name },
@@ -172,7 +285,7 @@ function ClosestConnectionBlock({ personA, personB, closestConnection }: Closest
 
   return (
     <section className="space-y-2.5 border-t border-stone-300/45 pt-3">
-      <p className="text-[11px] tracking-[0.08em] text-stone-500">CLOSEST THEY GOT</p>
+      <p className="text-[11px] tracking-[0.08em] text-stone-500">{heading}</p>
       <p className="text-sm text-stone-700">Both worked frequently with {closestConnection.name}.</p>
       <div className="space-y-1 text-xs text-stone-600">
         <p>
@@ -182,19 +295,21 @@ function ClosestConnectionBlock({ personA, personB, closestConnection }: Closest
           {personB.name} - {closestConnection.personBSharedCount} {closestConnection.personBSharedCount === 1 ? "title" : "titles"}
         </p>
       </div>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] tracking-tight text-stone-600">
-        <a
+      <div className="space-y-1.5">
+        <ViewPairAction
           href={compareFromA}
-          className="border-b border-stone-400 pb-0.5 transition-colors hover:border-stone-700 hover:text-stone-900"
-        >
-          Compare {personA.name} x {closestConnection.name}
-        </a>
-        <a
+          leftName={personA.name}
+          leftProfilePath={personA.profilePath}
+          rightName={closestConnection.name}
+          rightProfilePath={closestConnection.profilePath}
+        />
+        <ViewPairAction
           href={compareFromB}
-          className="border-b border-stone-400 pb-0.5 transition-colors hover:border-stone-700 hover:text-stone-900"
-        >
-          Compare {personB.name} x {closestConnection.name}
-        </a>
+          leftName={personB.name}
+          leftProfilePath={personB.profilePath}
+          rightName={closestConnection.name}
+          rightProfilePath={closestConnection.profilePath}
+        />
       </div>
     </section>
   );
@@ -206,6 +321,7 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
 
   const [leftQuery, setLeftQuery] = useState("");
   const [rightQuery, setRightQuery] = useState("");
+  const [shareState, setShareState] = useState<"idle" | "copied">("idle");
   const [leftSelectedPerson, setLeftSelectedPerson] = useState<PersonSearchResult | null>(initialPersonA);
   const [rightSelectedPerson, setRightSelectedPerson] = useState<PersonSearchResult | null>(initialPersonB);
   const { shouldShow, results, topCollaborators, closestConnection, isLoading, errorMessage } = useFilmtersects({
@@ -280,6 +396,20 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
   }, [rightSelectedPerson]);
 
   useEffect(() => {
+    if (shareState !== "copied") {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setShareState("idle");
+    }, 1200);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [shareState]);
+
+  useEffect(() => {
     if (leftSelectedPerson && rightSelectedPerson) {
       const nextPath = buildComparisonPath(
         { id: leftSelectedPerson.id, name: leftSelectedPerson.name },
@@ -298,6 +428,19 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
     }
   }, [leftSelectedPerson, pathname, rightSelectedPerson, router]);
 
+  const handleShareResults = async () => {
+    if (!navigator?.clipboard) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareState("copied");
+    } catch {
+      setShareState("idle");
+    }
+  };
+
   return (
     <section className="mx-auto flex h-full w-full max-w-90 flex-col justify-start gap-3 px-1.5 py-1 text-center sm:gap-4 sm:px-0 sm:py-2">
       <div className="space-y-2">
@@ -305,7 +448,16 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
         <p className="text-[13px] text-stone-600 sm:text-sm">Find where two film careers overlap.</p>
       </div>
 
-      <div className="mx-auto flex w-full flex-col gap-2.5 sm:max-w-[320px] sm:gap-3">
+      <div className="mx-auto flex items-center justify-center" aria-label="Selected people preview">
+        <SelectionAvatar person={leftSelectedPerson} side="left" />
+        <div className="-ml-4">
+          <SelectionAvatar person={rightSelectedPerson} side="right" />
+        </div>
+      </div>
+
+      <p className="mt-2 text-[11px] text-stone-500 sm:mt-2.5 sm:text-xs">Search any two cast or crew members.</p>
+
+      <div className="mx-auto mt-1 flex w-full flex-col gap-3 sm:max-w-[320px] sm:gap-3.5">
         <div className="w-full">
           <SearchAutocomplete
             label="Person one"
@@ -320,9 +472,6 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
             }}
           />
         </div>
-        <span className="self-center text-base font-light leading-none text-stone-500" aria-hidden="true">
-          ×
-        </span>
         <div className="w-full">
           <SearchAutocomplete
             label="Person two"
@@ -338,8 +487,6 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
           />
         </div>
       </div>
-
-      <p className="text-[11px] text-stone-500 sm:text-xs">Search any two cast or crew members.</p>
 
       {shouldShow ? (
         <section className="mx-auto w-full space-y-3 rounded-sm border-t border-stone-300/60 pt-3 text-left sm:max-w-85">
@@ -368,11 +515,23 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
                 personA={leftSelectedPerson}
                 personB={rightSelectedPerson}
                 closestConnection={closestConnection}
+                hasSharedTitles={results.length > 0}
               />
             </section>
           ) : null}
           {!isLoading && !errorMessage && results.length === 0 ? (
             <p className="text-sm text-stone-600">No shared titles found.</p>
+          ) : null}
+          {!isLoading && !errorMessage && leftSelectedPerson && rightSelectedPerson ? (
+            <div className="flex justify-center border-t border-stone-300/45 pt-3">
+              <button
+                type="button"
+                onClick={handleShareResults}
+                className="cursor-pointer rounded-full border border-stone-300/80 px-3 py-1 text-[11px] tracking-tight text-stone-700 transition-colors hover:border-stone-500 hover:text-stone-900"
+              >
+                {shareState === "copied" ? "Copied" : "Share this results"}
+              </button>
+            </div>
           ) : null}
         </section>
       ) : null}

@@ -50,6 +50,7 @@ function isClosestConnectionItem(value: unknown): value is ClosestConnection {
   return (
     typeof candidate.personId === "number" &&
     typeof candidate.name === "string" &&
+    (typeof candidate.profilePath === "string" || candidate.profilePath === null) &&
     typeof candidate.personASharedCount === "number" &&
     typeof candidate.personBSharedCount === "number"
   );

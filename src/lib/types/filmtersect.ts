@@ -42,6 +42,7 @@ export type TopCollaboratorsBySide = {
 export type ClosestConnection = {
   personId: number;
   name: string;
+  profilePath: string | null;
   personASharedCount: number;
   personBSharedCount: number;
 };

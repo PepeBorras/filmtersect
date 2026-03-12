@@ -24,7 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${sora.variable} ${literata.variable} antialiased`}>{children}</body>
+      <body suppressHydrationWarning className={`${sora.variable} ${literata.variable} antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }

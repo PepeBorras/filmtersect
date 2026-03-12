@@ -22,7 +22,7 @@ export function SelectedPerson({ person, onClear }: SelectedPersonProps) {
       <button
         type="button"
         onClick={onClear}
-        className="shrink-0 rounded-sm px-1 py-0.5 text-xs text-stone-500 transition-colors duration-150 hover:bg-stone-200/50 hover:text-stone-800 focus:outline-none focus-visible:bg-stone-200/50 focus-visible:text-stone-800"
+        className="cursor-pointer shrink-0 rounded-sm px-1 py-0.5 text-xs text-stone-500 transition-colors duration-150 hover:bg-stone-200/50 hover:text-stone-800 focus:outline-none focus-visible:bg-stone-200/50 focus-visible:text-stone-800"
         aria-label={`Clear ${person.name}`}
       >
         Clear
