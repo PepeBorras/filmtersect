@@ -85,6 +85,7 @@ export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
   const [closestConnection, setClosestConnection] = useState<ClosestConnection | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [hasCompared, setHasCompared] = useState(false);
 
   useEffect(() => {
     if (!personA || !personB) {
@@ -93,6 +94,7 @@ export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
       setClosestConnection(null);
       setErrorMessage(null);
       setIsLoading(false);
+      setHasCompared(false);
       return;
     }
 
@@ -102,6 +104,7 @@ export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
       setClosestConnection(null);
       setErrorMessage("Please choose two different people.");
       setIsLoading(false);
+      setHasCompared(false);
       return;
     }
 
@@ -110,6 +113,7 @@ export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
 
     setIsLoading(true);
     setErrorMessage(null);
+    setHasCompared(false);
 
     void (async () => {
       try {
@@ -147,6 +151,7 @@ export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
         setTopCollaborators(normalizeTopCollaborators(payload.topCollaborators));
         setClosestConnection(isClosestConnectionItem(payload.closestConnection) ? payload.closestConnection : null);
         setErrorMessage(null);
+        setHasCompared(true);
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
           return;
@@ -160,6 +165,7 @@ export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
         setTopCollaborators(EMPTY_TOP_COLLABORATORS);
         setClosestConnection(null);
         setErrorMessage(error instanceof Error ? error.message : "Compare failed.");
+        setHasCompared(true);
       } finally {
         if (isCurrentRequest) {
           setIsLoading(false);
@@ -175,6 +181,7 @@ export function useFilmtersects({ personA, personB }: UseFilmtersectsArgs) {
 
   return {
     shouldShow: Boolean(personA && personB),
+    hasCompared,
     results,
     topCollaborators,
     closestConnection,

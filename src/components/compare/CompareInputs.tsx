@@ -335,7 +335,7 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
   const [shareState, setShareState] = useState<"idle" | "copied">("idle");
   const [leftSelectedPerson, setLeftSelectedPerson] = useState<PersonSearchResult | null>(initialPersonA);
   const [rightSelectedPerson, setRightSelectedPerson] = useState<PersonSearchResult | null>(initialPersonB);
-  const { shouldShow, results, topCollaborators, closestConnection, isLoading, errorMessage } = useFilmtersects({
+  const { shouldShow, hasCompared, results, topCollaborators, closestConnection, isLoading, errorMessage } = useFilmtersects({
     personA: leftSelectedPerson,
     personB: rightSelectedPerson,
   });
@@ -507,11 +507,11 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
               {errorMessage}
             </p>
           ) : null}
-          {!isLoading && !errorMessage ? <ResultsSummary count={results.length} /> : null}
-          {!isLoading && !errorMessage && results.length > 0 && leftSelectedPerson && rightSelectedPerson ? (
+          {!isLoading && !errorMessage && hasCompared ? <ResultsSummary count={results.length} /> : null}
+          {!isLoading && !errorMessage && hasCompared && results.length > 0 && leftSelectedPerson && rightSelectedPerson ? (
             <ResultsList items={results} personAName={leftSelectedPerson.name} personBName={rightSelectedPerson.name} />
           ) : null}
-          {!isLoading && !errorMessage && leftSelectedPerson && rightSelectedPerson ? (
+          {!isLoading && !errorMessage && hasCompared && leftSelectedPerson && rightSelectedPerson ? (
             <section className="space-y-3 border-t border-stone-300/45 pt-3">
               <p className="text-[11px] tracking-[0.08em] text-stone-500">TOP COLLABORATORS</p>
               <TopCollaboratorBlock
@@ -530,10 +530,7 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
               />
             </section>
           ) : null}
-          {!isLoading && !errorMessage && results.length === 0 ? (
-            <p className="text-sm text-stone-600">No shared titles found.</p>
-          ) : null}
-          {!isLoading && !errorMessage && leftSelectedPerson && rightSelectedPerson ? (
+          {!isLoading && !errorMessage && hasCompared && leftSelectedPerson && rightSelectedPerson ? (
             <div className="flex justify-center border-t border-stone-300/45 pt-3">
               <button
                 type="button"
@@ -548,7 +545,7 @@ export function CompareInputs({ initialPersonA = null, initialPersonB = null }: 
       ) : null}
 
       <p className="mt-auto pt-1 text-[10px] leading-relaxed text-stone-500">
-        This product uses the TMDb API but is not endorsed or certified by TMDb.
+        This little app uses the TMDb API but is not endorsed or certified by TMDb.
       </p>
     </section>
   );
